@@ -1,37 +1,38 @@
 import streamlit as st
 
-# --- Definicja Magazynu (Globalna Lista) ---
-# Uwaga: Ta lista jest resetowana za każdym razem, gdy użytkownik kliknie przycisk
-# lub wprowadzi zmianę w interfejsie Streamlit.
+# --- Definicja Magazynu (GLOBALNA LISTA) ---
+# Ostrzeżenie: Ta lista jest resetowana do stanu początkowego przy każdej interakcji.
 magazyn_items = [
     {"nazwa": "Laptop", "ilosc": 5},
-    {"nazwa": "Kabel USB", "ilosc": 20}
+    {"nazwa": "Kabel USB", "ilosc": 20},
+    {"nazwa": "Myszka bezprzewodowa", "ilosc": 15}
 ]
 
 # --- Konfiguracja Strony ---
-st.title("💡 Najprostszy Magazyn Streamlit")
-st.markdown("**(Ostrzeżenie: Dane nie są trwałe i znikają po każdej interakcji!)**")
+st.set_page_config(page_title="Nietrwały Magazyn Streamlit", layout="centered")
+st.title("💡 Nietrwały Magazyn - Demo Listy Pythona")
+st.error("UWAGA: Dane są resetowane po każdym kliknięciu przycisku 'Dodaj' lub 'Usuń', ponieważ kod nie używa st.session_state.")
+
 
 # --- Sekcja Dodawania Towaru ---
-st.header("➕ Dodaj Towar (Tylko Wyświetlanie)")
+st.header("➕ Dodaj Towar (Tymczasowo)")
 col1, col2, col3 = st.columns([3, 1, 1])
 
 with col1:
-    nowa_nazwa = st.text_input("Nazwa Towaru", key="simple_input_nazwa")
+    nowa_nazwa = st.text_input("Nazwa Towaru", key="input_nazwa")
 with col2:
-    nowa_ilosc = st.number_input("Ilość", min_value=1, step=1, value=1, key="simple_input_ilosc")
+    nowa_ilosc = st.number_input("Ilość", min_value=1, step=1, value=1, key="input_ilosc")
 with col3:
     st.write(" ")
-    # Przycisk dodawania
-    if st.button("Dodaj do Listy", use_container_width=True):
+    
+    if st.button("Dodaj do Magazynu"):
         if nowa_nazwa and nowa_ilosc > 0:
-            # W tym miejscu towar zostałby dodany do listy 'magazyn_items'
-            # ale ponieważ skrypt zaraz się zrestartuje, to dodanie jest chwilowe.
+            # Towar zostaje dodany DO BIEŻĄCEJ KOPII listy w tym jednym przebiegu skryptu
             magazyn_items.append({"nazwa": nowa_nazwa, "ilosc": nowa_ilosc})
-            st.success(f"Dodano: {nowa_nazwa}. Sprawdź listę poniżej (będzie zawierać dodany element TYLKO w tym przebiegu skryptu).")
+            
+            st.success(f"Tymczasowo dodano: {nowa_nazwa}. Lista poniżej jest zaktualizowana, ale po kolejnym kliknięciu wróci do stanu początkowego.")
         else:
-            st.error("Wprowadź poprawne dane.")
-
+            st.warning("Wprowadź poprawną nazwę i ilość.")
 
 # --- Sekcja Wyświetlania ---
 st.header("📋 Aktualny Stan Listy")
@@ -43,19 +44,24 @@ else:
     st.table(magazyn_items)
 
     # --- Sekcja Usuwania ---
-    st.header("➖ Usuń Towar (Tylko Wyświetlanie)")
+    st.header("➖ Usuń Towar (Tymczasowo)")
     
     # Tworzenie listy opcji do usunięcia
     opcje_usuwania = [f"{i+1}. {item['nazwa']} (Ilość: {item['ilosc']})" for i, item in enumerate(magazyn_items)]
     
+    # Wybór indeksu elementu do usunięcia
     wybor_indeksu = st.selectbox(
-        "Wybierz towar do usunięcia",
+        "Wybierz element do usunięcia (wybór bazuje na aktualnej, tymczasowej liście)",
         options=list(range(len(magazyn_items))),
         format_func=lambda x: opcje_usuwania[x]
     )
     
     if st.button("Usuń Wybrany Towar"):
-        # W tym miejscu towar zostałby usunięty z listy 'magazyn_items'
-        # ale ponieważ skrypt zaraz się zrestartuje, to usunięcie jest chwilowe.
+        # Towar zostaje usunięty z BIEŻĄCEJ KOPII listy
         usuniety = magazyn_items.pop(wybor_indeksu)
-        st.warning(f"Usunięto: {usuniety['nazwa']}. Sprawdź listę poniżej (będzie pusta po interakcji).")
+        st.error(f"Tymczasowo usunięto: {usuniety['nazwa']}. Lista zaraz wróci do stanu początkowego.")
+
+
+# --- Sekcja Instrukcji ---
+st.markdown("---")
+st.info("Aby stworzyć **działający** magazyn, który pamięta zmiany, zamień logikę na użycie `st.session_state`.")
